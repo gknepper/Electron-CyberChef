@@ -1,0 +1,35 @@
+{
+  "name": "CyberChef",
+  "version": "1.0.0",
+  "description": "The Cyber Swiss Army Knife",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/gchq/CyberChef",
+  "keywords": [
+    "Electron",
+    "CyberChef",
+    "CyberSwissArmyKnife"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^16.0.7"
+  },
+  "build": {
+    "appId": "com. github.CyberChef",
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icons/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.png"
+    }
+  }
+}
