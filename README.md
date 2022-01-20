@@ -13,5 +13,7 @@ To create the mac DMG package run:
 ```
 git clone https://github.com/gknepper/Electron-CyberChef
 cd Electron-CyberChef
+yarn add electron-builder --dev
 electron-builder -m 
 ```
+Installer will be created at Electron-CyberChef/dist/CyberChef-1.0.0.dmg
