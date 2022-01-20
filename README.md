@@ -18,4 +18,14 @@ cd Electron-CyberChef
 yarn add electron-builder --dev
 electron-builder -m 
 ```
+
+To create the deb/Linux package run:
+```
+git clone https://github.com/gknepper/Electron-CyberChef
+cd Electron-CyberChef
+yarn add electron-builder --dev
+electron-builder --linux deb tar.xz
+```
+Windows: To do.
+
 Installer will be created at Electron-CyberChef/dist/CyberChef-1.0.0.dmg
