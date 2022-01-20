@@ -1,8 +1,10 @@
 {
-  "name": "CyberChef",
+  "name": "cyberchef",
+  "email" : "n1474335@gmail.com",
   "version": "1.0.0",
   "description": "The Cyber Swiss Army Knife",
   "main": "main.js",
+  "author": "n1474335 <n1474335@gmail.com>",
   "scripts": {
     "start": "electron ."
   },
@@ -12,10 +14,15 @@
     "CyberChef",
     "CyberSwissArmyKnife"
   ],
-  "author": "GitHub",
+  "author": {
+      "name": "CyberChef",
+      "email": "n1474335@gmail.com",
+      "url": "https://github.com/gchq/CyberChef"
+    },
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^16.0.7"
+    "electron": "^16.0.7",
+    "electron-builder": "^22.14.5"
   },
   "build": {
     "appId": "com. github.CyberChef",
