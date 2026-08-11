@@ -49,12 +49,7 @@ jobs:
           npm run postinstall
           npm run build
 
-      - name: Save cache
-        id: cache-restore
-        uses: actions/cache/save@v6
-        with:
-          path: $GITHUB_WORKSPACE/cyberchef.zip
-          key: cyberchef-${{ github.sha }}
+
 
       - name: Locate standalone build output
         working-directory: cyberchef-src
@@ -68,6 +63,13 @@ jobs:
           fi
           echo "Found build output: $OUT"
           cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
+
+      - name: Save cache
+        id: cache-restore
+        uses: actions/cache/save@v6
+        with:
+          path: $GITHUB_WORKSPACE/cyberchef.zip
+          key: cyberchef-${{ github.sha }}
 
       # - name: Cache ZIP
       #   uses: actions/cache@v6
