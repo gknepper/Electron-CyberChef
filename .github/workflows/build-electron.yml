@@ -78,7 +78,7 @@ jobs:
         with:
           repository: electron/minimal-repro
           # ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
-          ref: 'master'
+          ref: 'main'
           path: ''
 
       - name: Set up Node.js
