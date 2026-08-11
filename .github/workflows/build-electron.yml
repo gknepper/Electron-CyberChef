@@ -31,9 +31,9 @@ jobs:
           path: cyberchef-src
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '18'
+          node-version: '24.8.0'
           cache: 'npm'
           cache-dependency-path: cyberchef-src/package-lock.json
 
