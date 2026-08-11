@@ -70,13 +70,13 @@ jobs:
             exit 1
           fi
           echo "Found build output: $OUT"
-          # cp "$OUT" "$GITHUB_WORKSPACE/index.html"
+          cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
 
       - name: Cache ZIP
         uses: actions/cache@v4
         with:
-          path: build/prod/CyberChef_*.zip
-          key: CyberChef_${{ github.sha }}
+          path: cyberchef.zip
+          key: cyberchef_${{ github.sha }}
 
       # - name: Upload built CyberChef HTML
       #   uses: actions/upload-artifact@v4
@@ -108,12 +108,13 @@ jobs:
       - name: Restore ZIP
         uses: actions/cache@v4
         with:
-          path: build/prod/CyberChef_*.zip
-          key: my-app-${{ github.sha }}
+          path: artifacts/cyberchef.zip
+          key: cyberchef_${{ github.sha }}
 
       - name: Check ZIP
         run: |
-          ls -lh artifacts/my-app.zip
+          ls -lh artifacts/cyberchef.zip
+
 
 
       - name: Checkout Electron wrapper repository
