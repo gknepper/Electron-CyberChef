@@ -39,11 +39,15 @@ jobs:
 
       - name: Install CyberChef dependencies
         working-directory: cyberchef-src
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Build CyberChef (grunt prod)
         working-directory: cyberchef-src
-        run: npm run build
+        run: |
+          set -e
+          # CyberChef's build process requires some postinstall scripts to run first
+          npm run postinstall
+          npm run build
 
       - name: Locate standalone build output
         working-directory: cyberchef-src
