@@ -107,6 +107,13 @@ jobs:
           sparse-checkout-cone-mode: false
           path: ''
 
+      - name: Debug
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents:"
+          ls -la 
+          
+
       - name: Install wrapper dependencies
         run: npm ci
   
