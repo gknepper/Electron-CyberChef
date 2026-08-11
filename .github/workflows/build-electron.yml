@@ -73,7 +73,7 @@ jobs:
           cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
 
       - name: Cache ZIP
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: cyberchef.zip
           key: cyberchef_${{ github.sha }}
@@ -106,14 +106,14 @@ jobs:
 
     steps:
       - name: Restore ZIP
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
-          path: artifacts/cyberchef.zip
+          path: cyberchef.zip
           key: cyberchef_${{ github.sha }}
 
       - name: Check ZIP
         run: |
-          ls -lh artifacts/cyberchef.zip
+          ls -lh cyberchef.zip
 
 
 
