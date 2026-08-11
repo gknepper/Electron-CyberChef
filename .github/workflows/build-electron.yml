@@ -49,16 +49,6 @@ jobs:
           npm run postinstall
           npm run build
 
-      # - name: Cache Zip File
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: build/prod/CyberChef_*.zip
-      #     key: ${{ runner.os }}-zip-${{ hashFiles('build/prod/CyberChef_*.zip') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-zip-
-
-
-
       - name: Locate standalone build output
         working-directory: cyberchef-src
         run: |
@@ -78,42 +68,23 @@ jobs:
           path: cyberchef.zip
           key: cyberchef_${{ github.sha }}
 
-      # - name: Upload built CyberChef HTML
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: cyberchef-index-html
-      #     path: index.html
-      #     retention-days: 7
 
-  # ---------------------------------------------------------------------
-  # Stage 2: Wrap the built CyberChef HTML in Electron and package it
-  # for each target OS using electron-builder.
-  # ---------------------------------------------------------------------
-  package-electron:
+  build-electron:
     needs: build-cyberchef
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            build-cmd: npx electron-builder --linux deb tar.xz AppImage
-          - os: macos-latest
-            build-cmd: npx electron-builder -m
-          - os: windows-latest
-            build-cmd: npx electron-builder --win nsis
-
-    runs-on: ${{ matrix.os }}
-
+    runs-on: ubuntu-latest
     steps:
-
       - name: Checkout electron/minimal-repro
         uses: actions/checkout@v4
         with:
           repository: electron/minimal-repro
           ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
-          # path: /
 
-
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          cache: 'npm'
+          cache-dependency-path: cyberchef-src/package-lock.json
 
       - name: Restore ZIP
         uses: actions/cache@v6
@@ -133,14 +104,73 @@ jobs:
             package.json
           sparse-checkout-cone-mode: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24.19.0'
-          cache: 'npm'
-
       - name: Install wrapper dependencies
         run: npm ci
+  
+
+  
+  # ---------------------------------------------------------------------
+  # Stage 2: Wrap the built CyberChef HTML in Electron and package it
+  # for each target OS using electron-builder.
+  # ---------------------------------------------------------------------
+  # package-electron:
+  #   needs: build-cyberchef
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - os: ubuntu-latest
+  #           build-cmd: npx electron-builder --linux deb tar.xz AppImage
+  #         - os: macos-latest
+  #           build-cmd: npx electron-builder -m
+  #         - os: windows-latest
+  #           build-cmd: npx electron-builder --win nsis
+
+  #   runs-on: ${{ matrix.os }}
+
+  #   steps:
+
+  #     - name: Checkout electron/minimal-repro
+  #       uses: actions/checkout@v4
+  #       with:
+  #         repository: electron/minimal-repro
+  #         ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
+  #         # path: /
+
+
+
+  #     - name: Restore ZIP
+  #       uses: actions/cache@v6
+  #       with:
+  #         path: cyberchef.zip
+  #         key: cyberchef_${{ github.sha }}
+
+  #     - name: Clean old package.json and unzip CyberChef build
+  #       run: |
+  #         rm -f package.json
+  #         unzip -o cyberchef.zip -d .
+
+  #     - name: Checkout package.json
+  #       uses: actions/checkout@v4
+  #       with:
+  #         sparse-checkout: |
+  #           package.json
+  #         sparse-checkout-cone-mode: false
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v7
+  #       with:
+  #         node-version: '24.19.0'
+  #         cache: 'npm'
+
+  #     - name: Install wrapper dependencies
+  #       run: npm ci
+
+
+
+
+
+
 
 
       # - name: Check ZIP
