@@ -49,6 +49,15 @@ jobs:
           npm run postinstall
           npm run build
 
+      - name: Restore cache
+        id: cache-restore
+        uses: actions/cache@v6
+        with:
+          path: cyberchef-src/cyberchef.zip
+          key: cyberchef-${{ github.sha }}
+          restore-keys: |
+            cyberchef-
+
       - name: Locate standalone build output
         working-directory: cyberchef-src
         run: |
@@ -62,11 +71,11 @@ jobs:
           echo "Found build output: $OUT"
           cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
 
-      - name: Cache ZIP
-        uses: actions/cache@v6
-        with:
-          path: cyberchef.zip
-          key: cyberchef_${{ github.sha }}
+      # - name: Cache ZIP
+      #   uses: actions/cache@v6
+      #   with:
+      #     path: cyberchef.zip
+      #     key: cyberchef_${{ github.sha }}
 
 
   build-electron:
@@ -89,12 +98,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: cyberchef-src/package-lock.json
 
-      - name: Restore ZIP
-        # working-directory: cyberchef-src
+      # - name: Restore ZIP
+      #   # working-directory: cyberchef-src
+      #   uses: actions/cache@v6
+      #   with:
+      #     path: cyberchef-src/cyberchef.zip
+      #     key: cyberchef_${{ github.sha }}
+
+      - name: Retrieve cached zip
+        id: cache-restore
         uses: actions/cache@v6
         with:
           path: cyberchef-src/cyberchef.zip
-          key: cyberchef_${{ github.sha }}
+          key: cyberchef-${{ github.sha }}
+
+
 
       - name: Clean old package.json and unzip CyberChef build
         working-directory: cyberchef-src
