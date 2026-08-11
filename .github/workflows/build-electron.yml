@@ -53,7 +53,7 @@ jobs:
         id: cache-restore
         uses: actions/cache@v6
         with:
-          path: cyberchef-src/cyberchef.zip
+          path: $GITHUB_WORKSPACE/cyberchef.zip
           key: cyberchef-${{ github.sha }}
           restore-keys: |
             cyberchef-
@@ -109,7 +109,7 @@ jobs:
         id: cache-restore
         uses: actions/cache@v6
         with:
-          path: cyberchef-src/cyberchef.zip
+          path: $GITHUB_WORKSPACE/cyberchef.zip
           key: cyberchef-${{ github.sha }}
 
 
@@ -118,7 +118,7 @@ jobs:
         working-directory: cyberchef-src
         run: |
           rm -f package.json
-          unzip -o cyberchef.zip -d .
+          unzip -o $GITHUB_WORKSPACE/cyberchef.zip -d .
 
       - name: Checkout package.json
         uses: actions/checkout@v4
