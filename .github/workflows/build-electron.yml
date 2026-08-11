@@ -111,10 +111,8 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           # path: $GITHUB_WORKSPACE/cyberchef.zip
-          path: build/prod/cyberchef.zip
-          key: cyberchef-${{ github.sha }
-
-
+          path: 'build/prod/cyberchef.zip'
+          key: cyberchef-${{ github.sha }}
 
       - name: Clean old package.json and unzip CyberChef build
         working-directory: cyberchef-src
