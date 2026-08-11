@@ -105,20 +105,33 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+
+      - name: Checkout electron/minimal-repro
+        uses: actions/checkout@v4
+        with:
+          repository: electron/minimal-repro
+          ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
+          # path: /
+
+
+
       - name: Restore ZIP
         uses: actions/cache@v6
         with:
           path: cyberchef.zip
           key: cyberchef_${{ github.sha }}
 
-      - name: Check ZIP
+      - name: Clean old package.json and unzip CyberChef build
         run: |
-          ls -lh cyberchef.zip
+          rm -f package.json
+          unzip -o cyberchef.zip -d .
 
-
-
-      - name: Checkout Electron wrapper repository
+      - name: Checkout package.json
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            package.json
+          sparse-checkout-cone-mode: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
@@ -129,20 +142,46 @@ jobs:
       - name: Install wrapper dependencies
         run: npm ci
 
-      - name: Download built CyberChef HTML
-        uses: actions/download-artifact@v4
-        with:
-          name: cyberchef-index-html
-          path: .
 
-      - name: Verify index.html was placed correctly
-        shell: bash
-        run: |
-          if [ ! -f index.html ]; then
-            echo "index.html missing after artifact download"
-            exit 1
-          fi
-          echo "index.html present, $(wc -c < index.html) bytes"
+      # - name: Check ZIP
+      #   run: |
+      #     ls -lh cyberchef.zip
+
+
+      # - name: Checkout Electron wrapper repository
+      #   uses: actions/checkout@v4
+
+      # - name: Checkout package.json
+      #   uses: actions/checkout@v4
+      #   with:
+      #     sparse-checkout: |
+      #       package.json
+      #     sparse-checkout-cone-mode: false
+
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v7
+      #   with:
+      #     node-version: '24.19.0'
+      #     cache: 'npm'
+
+      # - name: Install wrapper dependencies
+      #   run: npm ci
+
+      # - name: Download built CyberChef HTML
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: cyberchef-index-html
+      #     path: .
+
+      # - name: Verify index.html was placed correctly
+      #   shell: bash
+      #   run: |
+      #     if [ ! -f index.html ]; then
+      #       echo "index.html missing after artifact download"
+      #       exit 1
+      #     fi
+      #     echo "index.html present, $(wc -c < index.html) bytes"
 
       # - name: Package with electron-builder
       #   run: ${{ matrix.build-cmd }}
