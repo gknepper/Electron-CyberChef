@@ -90,10 +90,10 @@ jobs:
           cache-dependency-path: cyberchef-src/package-lock.json
 
       - name: Restore ZIP
-        working-directory: cyberchef-src
+        # working-directory: cyberchef-src
         uses: actions/cache@v6
         with:
-          path: cyberchef.zip
+          path: cyberchef-src/cyberchef.zip
           key: cyberchef_${{ github.sha }}
 
       - name: Clean old package.json and unzip CyberChef build
