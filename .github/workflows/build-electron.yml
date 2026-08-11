@@ -79,22 +79,25 @@ jobs:
           repository: electron/minimal-repro
           # ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
           ref: 'main'
-          path: ''
+          # path: ''
+          path: cyberchef-src
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: '24.19.0'
           cache: 'npm'
-          # cache-dependency-path: cyberchef-src/package-lock.json
+          cache-dependency-path: cyberchef-src/package-lock.json
 
       - name: Restore ZIP
+        working-directory: cyberchef-src
         uses: actions/cache@v6
         with:
           path: cyberchef.zip
           key: cyberchef_${{ github.sha }}
 
       - name: Clean old package.json and unzip CyberChef build
+        working-directory: cyberchef-src
         run: |
           rm -f package.json
           unzip -o cyberchef.zip -d .
@@ -105,9 +108,10 @@ jobs:
           sparse-checkout: |
             package.json
           sparse-checkout-cone-mode: false
-          path: ''
+          path: cyberchef-src/package.json
 
       - name: Debug
+        working-directory: cyberchef-src
         run: |
           echo "Current directory: $(pwd)"
           echo "Contents:"
@@ -115,6 +119,7 @@ jobs:
           
 
       - name: Install wrapper dependencies
+        working-directory: cyberchef-src
         run: npm ci
   
 
