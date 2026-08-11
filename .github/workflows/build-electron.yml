@@ -1,0 +1,132 @@
+name: Build CyberChef Electron App
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      cyberchef-ref:
+        description: 'CyberChef git ref to build (branch, tag, or commit)'
+        required: false
+        default: 'master'
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Stage 1: Build CyberChef itself into a single standalone HTML file.
+  # Done once, on Linux only — CyberChef's Grunt/Webpack build relies on
+  # Unix shell syntax and is not reliable on native Windows runners.
+  # The resulting file is reused by every OS in the packaging stage.
+  # ---------------------------------------------------------------------
+  build-cyberchef:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout CyberChef source
+        uses: actions/checkout@v4
+        with:
+          repository: gchq/CyberChef
+          ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
+          path: cyberchef-src
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: cyberchef-src/package-lock.json
+
+      - name: Install CyberChef dependencies
+        working-directory: cyberchef-src
+        run: npm ci
+
+      - name: Build CyberChef (grunt prod)
+        working-directory: cyberchef-src
+        run: npm run build
+
+      - name: Locate standalone build output
+        working-directory: cyberchef-src
+        run: |
+          set -e
+          OUT=$(find build/prod -maxdepth 1 -iname "cyberchef*.htm*" | head -n 1)
+          if [ -z "$OUT" ]; then
+            echo "Could not find CyberChef standalone build output in build/prod"
+            ls -la build/prod
+            exit 1
+          fi
+          echo "Found build output: $OUT"
+          cp "$OUT" "$GITHUB_WORKSPACE/index.html"
+
+      - name: Upload built CyberChef HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyberchef-index-html
+          path: index.html
+          retention-days: 7
+
+  # ---------------------------------------------------------------------
+  # Stage 2: Wrap the built CyberChef HTML in Electron and package it
+  # for each target OS using electron-builder.
+  # ---------------------------------------------------------------------
+  package-electron:
+    needs: build-cyberchef
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            build-cmd: npx electron-builder --linux deb tar.xz AppImage
+          - os: macos-latest
+            build-cmd: npx electron-builder -m
+          - os: windows-latest
+            build-cmd: npx electron-builder --win nsis
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Electron wrapper repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install wrapper dependencies
+        run: npm ci
+
+      - name: Download built CyberChef HTML
+        uses: actions/download-artifact@v4
+        with:
+          name: cyberchef-index-html
+          path: .
+
+      - name: Verify index.html was placed correctly
+        shell: bash
+        run: |
+          if [ ! -f index.html ]; then
+            echo "index.html missing after artifact download"
+            exit 1
+          fi
+          echo "index.html present, $(wc -c < index.html) bytes"
+
+      # - name: Package with electron-builder
+      #   run: ${{ matrix.build-cmd }}
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # - name: Upload packaged app
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: CyberChef-Electron-${{ matrix.os }}
+      #     path: |
+      #       dist/*.dmg
+      #       dist/*.deb
+      #       dist/*.tar.xz
+      #       dist/*.AppImage
+      #       dist/*.exe
+      #       dist/*.zip
+      #     if-no-files-found: ignore
