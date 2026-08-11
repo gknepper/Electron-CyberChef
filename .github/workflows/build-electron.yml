@@ -49,26 +49,35 @@ jobs:
           npm run postinstall
           npm run build
 
-      - name: Cache Zip File
-        uses: actions/cache@v4
-        with:
-          path: build/prod/CyberChef_*.zip
-          key: ${{ runner.os }}-zip-${{ hashFiles('build/prod/CyberChef_*.zip') }}
-          restore-keys: |
-            ${{ runner.os }}-zip-
+      # - name: Cache Zip File
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: build/prod/CyberChef_*.zip
+      #     key: ${{ runner.os }}-zip-${{ hashFiles('build/prod/CyberChef_*.zip') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-zip-
+
+
 
       - name: Locate standalone build output
         working-directory: cyberchef-src
         run: |
           set -e
-          OUT=$(find build/prod -maxdepth 1 -iname "cyberchef*.htm*" | head -n 1)
+          OUT=$(find build/prod -maxdepth 1 -iname "CyberChef_*.zip" | head -n 1)
           if [ -z "$OUT" ]; then
             echo "Could not find CyberChef standalone build output in build/prod"
             ls -la build/prod
             exit 1
           fi
           echo "Found build output: $OUT"
-          cp "$OUT" "$GITHUB_WORKSPACE/index.html"
+          # cp "$OUT" "$GITHUB_WORKSPACE/index.html"
+
+      - name: Cache ZIP
+        working-directory: cyberchef-src
+        uses: actions/cache@v4
+        with:
+          path: build/prod/CyberChef_*.zip
+          key: CyberChef_${{ github.sha }}
 
       # - name: Upload built CyberChef HTML
       #   uses: actions/upload-artifact@v4
@@ -97,6 +106,17 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Restore ZIP
+        uses: actions/cache@v4
+        with:
+          path: build/prod/CyberChef_*.zip
+          key: my-app-${{ github.sha }}
+
+      - name: Check ZIP
+        run: |
+          ls -lh artifacts/my-app.zip
+
+
       - name: Checkout Electron wrapper repository
         uses: actions/checkout@v4
 
