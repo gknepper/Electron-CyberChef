@@ -22,8 +22,8 @@
       "output": "dist"
     },
     "files": [
-      "assets/*",
-      "images/*",
+      "assets/**/*",
+      "images/**/*",
       "index.html"
     ],
     "mac": {
