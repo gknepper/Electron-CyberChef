@@ -131,10 +131,10 @@ jobs:
       #   working-directory: electron
       #   run: npm ci
 
-      # - name: Install "npm install electron-builder --save-dev"
-      #   working-directory: electron
-      #   run: |
-      #     npm install electron-builder --save-dev
+      - name: Install "npm install electron-builder --save-dev"
+        working-directory: electron
+        run: |
+          npm install electron-builder --save-dev
 
       - name: Install "npm run build"
         working-directory: electron
