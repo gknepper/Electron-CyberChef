@@ -64,13 +64,13 @@ jobs:
           echo "Found build output: $OUT"
           cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
 
-      - name: Save cache
-        id: cache-restore
-        uses: actions/cache/save@v6
-        with:
-          # path: $GITHUB_WORKSPACE/cyberchef.zip
-          path: build/prod/cyberchef.zip
-          key: cyberchef-${{ github.sha }}
+      # - name: Save cache
+      #   id: cache-restore
+      #   uses: actions/cache/save@v6
+      #   with:
+      #     # path: $GITHUB_WORKSPACE/cyberchef.zip
+      #     path: build/prod/cyberchef.zip
+      #     key: cyberchef-${{ github.sha }}
 
       # - name: Cache ZIP
       #   uses: actions/cache@v6
@@ -79,10 +79,10 @@ jobs:
       #     key: cyberchef_${{ github.sha }}
 
 
-  build-electron:
-    needs: build-cyberchef
-    runs-on: ubuntu-latest
-    steps:
+  # build-electron:
+  #   needs: build-cyberchef
+  #   runs-on: ubuntu-latest
+  #   steps:
       - name: Checkout electron/minimal-repro
         uses: actions/checkout@v4
         with:
@@ -90,14 +90,14 @@ jobs:
           # ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
           ref: 'main'
           # path: ''
-          path: cyberchef-src
+          path: electron
 
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: '24.19.0'
           cache: 'npm'
-          cache-dependency-path: cyberchef-src/package-lock.json
+          cache-dependency-path: electron/package-lock.json
 
       # - name: Restore ZIP
       #   # working-directory: cyberchef-src
@@ -106,19 +106,19 @@ jobs:
       #     path: cyberchef-src/cyberchef.zip
       #     key: cyberchef_${{ github.sha }}
 
-      - name: Retrieve cached zip
-        id: cache-restore
-        uses: actions/cache/restore@v6
-        with:
-          # path: $GITHUB_WORKSPACE/cyberchef.zip
-          path: 'build/prod/cyberchef.zip'
-          key: cyberchef-${{ github.sha }}
+      # - name: Retrieve cached zip
+      #   id: cache-restore
+      #   uses: actions/cache/restore@v6
+      #   with:
+      #     # path: $GITHUB_WORKSPACE/cyberchef.zip
+      #     path: 'build/prod/cyberchef.zip'
+      #     key: cyberchef-${{ github.sha }}
 
       - name: Clean old package.json and unzip CyberChef build
-        working-directory: cyberchef-src
+        working-directory: electron
         run: |
           rm -f package.json
-          unzip -o $GITHUB_WORKSPACE/cyberchef.zip -d .
+          unzip -o $GITHUB_WORKSPACE/cyberchef-src/build/prod/cyberchef.zip -d .
 
       - name: Checkout package.json
         uses: actions/checkout@v4
@@ -126,18 +126,17 @@ jobs:
           sparse-checkout: |
             package.json
           sparse-checkout-cone-mode: false
-          path: cyberchef-src/package.json
+          path: electron/package.json
 
       - name: Debug
-        working-directory: cyberchef-src
+        working-directory: electron
         run: |
           echo "Current directory: $(pwd)"
           echo "Contents:"
           ls -la 
           
-
       - name: Install wrapper dependencies
-        working-directory: cyberchef-src
+        working-directory: electron
         run: npm ci
   
 
