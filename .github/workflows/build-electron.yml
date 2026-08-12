@@ -23,60 +23,48 @@ jobs:
   build-cyberchef:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout CyberChef source
-        uses: actions/checkout@v4
-        with:
-          repository: gchq/CyberChef
-          ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
-          path: cyberchef-src
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24.19.0'
-          cache: 'npm'
-          cache-dependency-path: cyberchef-src/package-lock.json
-
-      - name: Install CyberChef dependencies
-        working-directory: cyberchef-src
-        run: npm ci --ignore-scripts
-
-      - name: Build CyberChef (grunt prod)
-        working-directory: cyberchef-src
-        run: |
-          set -e
-          # CyberChef's build process requires some postinstall scripts to run first
-          npm run postinstall
-          npm run build
-
-
-
-      - name: Locate standalone build output
-        working-directory: cyberchef-src
-        run: |
-          set -e
-          OUT=$(find build/prod -maxdepth 1 -iname "CyberChef_*.zip" | head -n 1)
-          if [ -z "$OUT" ]; then
-            echo "Could not find CyberChef standalone build output in build/prod"
-            ls -la build/prod
-            exit 1
-          fi
-          echo "Found build output: $OUT"
-          cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
-
-      # - name: Save cache
-      #   id: cache-restore
-      #   uses: actions/cache/save@v6
+      # - name: Checkout CyberChef source
+      #   uses: actions/checkout@v4
       #   with:
-      #     # path: $GITHUB_WORKSPACE/cyberchef.zip
-      #     path: build/prod/cyberchef.zip
-      #     key: cyberchef-${{ github.sha }}
+      #     repository: gchq/CyberChef
+      #     ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
+      #     path: cyberchef-src
 
-      # - name: Cache ZIP
-      #   uses: actions/cache@v6
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v7
       #   with:
-      #     path: cyberchef.zip
-      #     key: cyberchef_${{ github.sha }}
+      #     node-version: '24.19.0'
+      #     cache: 'npm'
+      #     cache-dependency-path: cyberchef-src/package-lock.json
+
+      # - name: Install CyberChef dependencies
+      #   working-directory: cyberchef-src
+      #   run: npm ci --ignore-scripts
+
+      # - name: Build CyberChef (grunt prod)
+      #   working-directory: cyberchef-src
+      #   run: |
+      #     set -e
+      #     # CyberChef's build process requires some postinstall scripts to run first
+      #     npm run postinstall
+      #     npm run build
+
+
+
+      # - name: Locate standalone build output
+      #   working-directory: cyberchef-src
+      #   run: |
+      #     set -e
+      #     OUT=$(find build/prod -maxdepth 1 -iname "CyberChef_*.zip" | head -n 1)
+      #     if [ -z "$OUT" ]; then
+      #       echo "Could not find CyberChef standalone build output in build/prod"
+      #       ls -la build/prod
+      #       exit 1
+      #     fi
+      #     echo "Found build output: $OUT"
+      #     cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
+
+
 
 
   # build-electron:
@@ -87,9 +75,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: electron/minimal-repro
-          # ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
           ref: 'main'
-          # path: ''
           path: electron
 
       - name: Set up Node.js
@@ -99,30 +85,32 @@ jobs:
           cache: 'npm'
           cache-dependency-path: electron/package-lock.json
 
-      # - name: Restore ZIP
-      #   # working-directory: cyberchef-src
-      #   uses: actions/cache@v6
-      #   with:
-      #     path: cyberchef-src/cyberchef.zip
-      #     key: cyberchef_${{ github.sha }}
-
-      # - name: Retrieve cached zip
-      #   id: cache-restore
-      #   uses: actions/cache/restore@v6
-      #   with:
-      #     # path: $GITHUB_WORKSPACE/cyberchef.zip
-      #     path: 'build/prod/cyberchef.zip'
-      #     key: cyberchef-${{ github.sha }}
-
       - name: Clean old package.json
         working-directory: electron
         run: |
           rm -f package.json
 
-      - name: Unzip CyberChef build
+      - name: CyberChef test
         working-directory: electron
         run: |
-          unzip -o $GITHUB_WORKSPACE/cyberchef.zip -d .
+          set -e          
+          curl -L -o cyberchef.zip "https://github.com/gchq/CyberChef/releases/download/v11.3.0/CyberChef_d24ba1afce2e3a080308b5df7db033332fe94a1a.zip"
+          unzip -o cyberchef.zip -d .
+          cp CyberChef_*.html index.html
+
+      # - name: Locate standalone build output
+      #   working-directory: electron
+      #   run: |
+      #     set -e
+      #     OUT=$(find build/prod -maxdepth 1 -iname "CyberChef_*.zip" | head -n 1)
+      #     if [ -z "$OUT" ]; then
+      #       echo "Could not find CyberChef standalone build output in build/prod"
+      #       ls -la build/prod
+      #       exit 1
+      #     fi
+      #     echo "Found build output: $OUT"
+      #     cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
+
 
       - name: Checkout package.json
         uses: actions/checkout@v4

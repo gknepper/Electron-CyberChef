@@ -1,42 +1,46 @@
 {
   "name": "cyberchef",
-  "email" : "n1474335@gmail.com",
   "version": "1.0.0",
   "description": "The Cyber Swiss Army Knife",
-  "main": "main.js",
   "author": "n1474335 <n1474335@gmail.com>",
+  "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
-  "repository": "https://github.com/gchq/CyberChef",
-  "keywords": [
-    "Electron",
-    "CyberChef",
-    "CyberSwissArmyKnife"
-  ],
-  "author": {
-      "name": "CyberChef",
-      "email": "n1474335@gmail.com",
-      "url": "https://github.com/gchq/CyberChef"
-    },
-  "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^24.0.0",
-    "electron-builder": "^23.6.0"
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0"
   },
   "build": {
-    "appId": "com. github.CyberChef",
+    "appId": "com.cyberchef.cyberchef",
+    "productName": "cyberchef",
+    "copyright": "Copyright © 2026 cyberchef",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "assets/*",
+      "images/*",
+      "index.html"
+    ],
     "mac": {
-      "target": "dmg",
-      "icon": "build/icons/icon.png"
+      "category": "public.app-category.utilities",
+      "target": ["dmg", "zip"]
     },
     "win": {
-      "target": "nsis",
-      "icon": "build/icon.png"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
+      ]
     },
     "linux": {
-      "target": "AppImage",
-      "icon": "build/icon.png"
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
     }
   }
 }
