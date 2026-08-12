@@ -114,11 +114,15 @@ jobs:
       #     path: 'build/prod/cyberchef.zip'
       #     key: cyberchef-${{ github.sha }}
 
-      - name: Clean old package.json and unzip CyberChef build
+      - name: Clean old package.json
         working-directory: electron
         run: |
           rm -f package.json
-          unzip -o $GITHUB_WORKSPACE/cyberchef-src/build/prod/cyberchef.zip -d .
+
+      - name: Unzip CyberChef build
+        working-directory: electron
+        run: |
+          unzip -o $GITHUB_WORKSPACE/cyberchef.zip -d .
 
       - name: Checkout package.json
         uses: actions/checkout@v4
