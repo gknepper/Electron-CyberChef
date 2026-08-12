@@ -139,10 +139,19 @@ jobs:
           echo "Contents:"
           ls -la 
           
-      - name: Install wrapper dependencies
+      # - name: Install wrapper dependencies
+      #   working-directory: electron
+      #   run: npm ci
+
+      - name: Install "npm install electron-builder --save-dev"
         working-directory: electron
-        run: npm ci
-  
+        run: |
+          npm install electron-builder --save-dev
+
+      - name: Install "npm run build"
+        working-directory: electron
+        run: |  
+          npm run build
 
 
   # ---------------------------------------------------------------------
