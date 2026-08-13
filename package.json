@@ -29,12 +29,12 @@
       "package.json"
     ],
     "mac": {
-      "icon": "build/icons/icon.png",
+      "icon": "images/cyberchef-128x128.png",
       "category": "public.app-category.utilities",
       "target": "dmg"
     },
     "win": {
-      "icon": "build/icons/icon.png",
+      "icon": "images/cyberchef-128x128.png",
       "target": [
         {
           "target": "nsis",
@@ -43,7 +43,7 @@
       ]
     },
     "linux": {
-      "icon": "build/icons/icon.png",
+      "icon": "images/cyberchef-128x128.png",
       "target": [
         {
           "target": ["AppImage", "deb", "tar.xz"],
