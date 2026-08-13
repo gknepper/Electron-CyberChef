@@ -1,0 +1,331 @@
+name: Build CyberChef Electron App
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      cyberchef-ref:
+        description: 'CyberChef git ref to build (branch, tag, or commit)'
+        required: false
+        default: 'master'
+
+jobs:
+  # ---------------------------------------------------------------------
+  # Stage 1: Build CyberChef itself into a single standalone HTML file.
+  # Done once, on Linux only — CyberChef's Grunt/Webpack build relies on
+  # Unix shell syntax and is not reliable on native Windows runners.
+  # The resulting file is reused by every OS in the packaging stage.
+  # ---------------------------------------------------------------------
+  build-cyberchef:
+    runs-on: ubuntu-latest
+    steps:
+      # - name: Checkout CyberChef source
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: gchq/CyberChef
+      #     ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
+      #     path: cyberchef-src
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v7
+      #   with:
+      #     node-version: '24.19.0'
+      #     cache: 'npm'
+      #     cache-dependency-path: cyberchef-src/package-lock.json
+
+      # - name: Install CyberChef dependencies
+      #   working-directory: cyberchef-src
+      #   run: npm ci --ignore-scripts
+
+      # - name: Build CyberChef (grunt prod)
+      #   working-directory: cyberchef-src
+      #   run: |
+      #     set -e
+      #     # CyberChef's build process requires some postinstall scripts to run first
+      #     npm run postinstall
+      #     npm run build
+
+
+
+      # - name: Locate standalone build output
+      #   working-directory: cyberchef-src
+      #   run: |
+      #     set -e
+      #     OUT=$(find build/prod -maxdepth 1 -iname "CyberChef_*.zip" | head -n 1)
+      #     if [ -z "$OUT" ]; then
+      #       echo "Could not find CyberChef standalone build output in build/prod"
+      #       ls -la build/prod
+      #       exit 1
+      #     fi
+      #     echo "Found build output: $OUT"
+      #     cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
+
+
+
+
+  # build-electron:
+  #   needs: build-cyberchef
+  #   runs-on: ubuntu-latest
+  #   steps:
+      - name: Checkout electron/minimal-repro
+        uses: actions/checkout@v4
+        with:
+          repository: electron/minimal-repro
+          ref: 'main'
+          path: electron
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          cache: 'npm'
+          cache-dependency-path: electron/package-lock.json
+
+      - name: Clean old package.json
+        working-directory: electron
+        run: |
+          rm -f package.json
+
+      - name: CyberChef test
+        working-directory: electron
+        run: |
+          set -e          
+          curl -L -o cyberchef.zip "https://github.com/gchq/CyberChef/releases/download/v11.3.0/CyberChef_d24ba1afce2e3a080308b5df7db033332fe94a1a.zip"
+          unzip -o cyberchef.zip -d .
+          cp CyberChef_*.html index.html
+
+      # - name: Locate standalone build output
+      #   working-directory: electron
+      #   run: |
+      #     set -e
+      #     OUT=$(find build/prod -maxdepth 1 -iname "CyberChef_*.zip" | head -n 1)
+      #     if [ -z "$OUT" ]; then
+      #       echo "Could not find CyberChef standalone build output in build/prod"
+      #       ls -la build/prod
+      #       exit 1
+      #     fi
+      #     echo "Found build output: $OUT"
+      #     cp "$OUT" "$GITHUB_WORKSPACE/cyberchef.zip"
+
+
+      - name: Checkout package.json
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            package.json
+          sparse-checkout-cone-mode: false
+          path: electron/temp
+
+      - name: mv package.json 
+        working-directory: electron
+        run: |
+            mv temp/package.json .
+
+      - name: Debug
+        working-directory: electron
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents:"
+          ls -la 
+          
+      # - name: Install wrapper dependencies
+      #   working-directory: electron
+      #   run: npm ci
+
+      - name: Install "npm install electron-builder --save-dev"
+        working-directory: electron
+        run: |
+          npm install electron-builder --save-dev --publish never
+
+      # - name: Install "npm run dist"
+      #   working-directory: electron
+      #   run: |
+      #     DEBUG=electron-builder  
+      #     npm run dist
+
+      - name: Upload Workspace Directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace-artifact
+          path: electron/           # Directory to zip and upload
+
+
+
+  # ---------------------------------------------------------------------
+  # Stage 2: Wrap the built CyberChef HTML in Electron and package it
+  # for each target OS using electron-builder.
+  # ---------------------------------------------------------------------
+  package-electron:
+    needs: build-cyberchef
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            build-cmd: |
+              npm install electron-builder --save-dev --publish never
+              npm run dist 
+              # npx electron-builder --linux deb tar.xz AppImage
+          - os: macos-latest
+            build-cmd: |
+              npm install electron-builder --save-dev --publish never
+              npm run dist 
+              # npx electron-builder -m
+          - os: windows-latest
+            build-cmd: |
+              npm install electron-builder --save-dev --publish never
+              npm run dist 
+              # npx electron-builder --win nsis
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Workspace Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace-artifact
+          path: electron/           # Directory to unpack into
+
+      # - name: Debug
+      #   working-directory: electron
+      #   run: |
+      #     echo "Current directory: $(pwd)"
+      #     echo "Contents:"
+      #     ls -la 
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          cache: 'npm'
+
+      # - name: Install "npm install electron-builder --save-dev"
+      #   working-directory: electron
+      #   run: |
+      #     npm install electron-builder --save-dev
+
+      # - name: Install wrapper dependencies
+      #   run: npm ci
+
+      - name: Package with electron-builder
+        run: ${{ matrix.build-cmd }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # - name: Upload packaged app
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: CyberChef-Electron-${{ matrix.os }}
+      #     path: |
+      #       dist/*.dmg
+      #       dist/*.deb
+      #       dist/*.tar.xz
+      #       dist/*.AppImage
+      #       dist/*.exe
+      #       dist/*.zip
+      #     if-no-files-found: ignore
+
+
+ ##########################################################     
+
+  #     - name: Checkout electron/minimal-repro
+  #       uses: actions/checkout@v4
+  #       with:
+  #         repository: electron/minimal-repro
+  #         ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
+  #         # path: /
+
+  #     - name: Restore ZIP
+  #       uses: actions/cache@v6
+  #       with:
+  #         path: cyberchef.zip
+  #         key: cyberchef_${{ github.sha }}
+
+  #     - name: Clean old package.json and unzip CyberChef build
+  #       run: |
+  #         rm -f package.json
+  #         unzip -o cyberchef.zip -d .
+
+  #     - name: Checkout package.json
+  #       uses: actions/checkout@v4
+  #       with:
+  #         sparse-checkout: |
+  #           package.json
+  #         sparse-checkout-cone-mode: false
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v7
+  #       with:
+  #         node-version: '24.19.0'
+  #         cache: 'npm'
+
+  #     - name: Install wrapper dependencies
+  #       run: npm ci
+
+
+      # - name: Check ZIP
+      #   run: |
+      #     ls -lh cyberchef.zip
+
+
+      # - name: Checkout Electron wrapper repository
+      #   uses: actions/checkout@v4
+
+      # - name: Checkout package.json
+      #   uses: actions/checkout@v4
+      #   with:
+      #     sparse-checkout: |
+      #       package.json
+      #     sparse-checkout-cone-mode: false
+
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v7
+      #   with:
+      #     node-version: '24.19.0'
+      #     cache: 'npm'
+
+      # - name: Install wrapper dependencies
+      #   run: npm ci
+
+      # - name: Download built CyberChef HTML
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: cyberchef-index-html
+      #     path: .
+
+      # - name: Verify index.html was placed correctly
+      #   shell: bash
+      #   run: |
+      #     if [ ! -f index.html ]; then
+      #       echo "index.html missing after artifact download"
+      #       exit 1
+      #     fi
+      #     echo "index.html present, $(wc -c < index.html) bytes"
+
+      # - name: Package with electron-builder
+      #   run: ${{ matrix.build-cmd }}
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # - name: Upload packaged app
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: CyberChef-Electron-${{ matrix.os }}
+      #     path: |
+      #       dist/*.dmg
+      #       dist/*.deb
+      #       dist/*.tar.xz
+      #       dist/*.AppImage
+      #       dist/*.exe
+      #       dist/*.zip
+      #     if-no-files-found: ignore
