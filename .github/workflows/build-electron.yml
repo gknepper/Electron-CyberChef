@@ -165,11 +165,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            build-cmd: npx electron-builder --linux deb tar.xz AppImage
+            build-cmd: npm run dist # npx electron-builder --linux deb tar.xz AppImage
           - os: macos-latest
-            build-cmd: npx electron-builder -m
+            build-cmd: npm run dist # npx electron-builder -m
           - os: windows-latest
-            build-cmd: npx electron-builder --win nsis
+            build-cmd: npm run dist # npx electron-builder --win nsis
 
     runs-on: ${{ matrix.os }}
 
@@ -210,7 +210,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
+      # - name: Upload packaged app
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: CyberChef-Electron-${{ matrix.os }}
+      #     path: |
+      #       dist/*.dmg
+      #       dist/*.deb
+      #       dist/*.tar.xz
+      #       dist/*.AppImage
+      #       dist/*.exe
+      #       dist/*.zip
+      #     if-no-files-found: ignore
 
+
+ ##########################################################     
 
   #     - name: Checkout electron/minimal-repro
   #       uses: actions/checkout@v4
