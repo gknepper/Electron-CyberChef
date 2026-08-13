@@ -141,10 +141,10 @@ jobs:
         run: |
           npm install electron-builder --save-dev
 
-      - name: Install "npm run build"
+      - name: Install "npm run dist"
         working-directory: electron
         run: |  
-          npm run build
+          npm run dist
 
 
   # ---------------------------------------------------------------------
