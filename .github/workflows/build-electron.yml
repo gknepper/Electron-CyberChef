@@ -146,6 +146,13 @@ jobs:
         run: |  
           npm run dist
 
+      - name: Upload Workspace Directory
+        uses: actions/upload-artifact@v4
+        with:
+          name: workspace-artifact
+          path: electron/           # Directory to zip and upload
+
+
 
   # ---------------------------------------------------------------------
   # Stage 2: Wrap the built CyberChef HTML in Electron and package it
@@ -167,6 +174,14 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Workspace Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: workspace-artifact
+          path: electron/           # Directory to unpack into
 
       - name: Debug
         working-directory: electron
@@ -226,7 +241,7 @@ jobs:
   #     - name: Install wrapper dependencies
   #       run: npm ci
 
-  
+
       # - name: Check ZIP
       #   run: |
       #     ls -lh cyberchef.zip
