@@ -118,7 +118,12 @@ jobs:
           sparse-checkout: |
             package.json
           sparse-checkout-cone-mode: false
-          path: electron
+          path: electron/temp
+
+      - name: mv package.json 
+        working-directory: electron
+        run: |
+            mv temp/package.json .
 
       - name: Debug
         working-directory: electron
@@ -126,11 +131,6 @@ jobs:
           echo "Current directory: $(pwd)"
           echo "Contents:"
           ls -la 
-          
-      - name: Debug
-        working-directory: electron
-        run: |
-          cat package.json
           
       # - name: Install wrapper dependencies
       #   working-directory: electron
