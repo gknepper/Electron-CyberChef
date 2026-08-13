@@ -141,11 +141,11 @@ jobs:
         run: |
           npm install electron-builder --save-dev --publish never
 
-      - name: Install "npm run dist"
-        working-directory: electron
-        run: |
-          DEBUG=electron-builder  
-          npm run dist
+      # - name: Install "npm run dist"
+      #   working-directory: electron
+      #   run: |
+      #     DEBUG=electron-builder  
+      #     npm run dist
 
       - name: Upload Workspace Directory
         uses: actions/upload-artifact@v4
