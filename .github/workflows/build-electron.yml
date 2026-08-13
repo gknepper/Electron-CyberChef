@@ -196,8 +196,13 @@ jobs:
           node-version: '24.19.0'
           cache: 'npm'
 
-      - name: Install wrapper dependencies
-        run: npm ci
+      - name: Install "npm install electron-builder --save-dev"
+        working-directory: electron
+        run: |
+          npm install electron-builder --save-dev
+
+      # - name: Install wrapper dependencies
+      #   run: npm ci
 
       - name: Package with electron-builder
         run: ${{ matrix.build-cmd }}
