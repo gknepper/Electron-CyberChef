@@ -151,22 +151,46 @@ jobs:
   # Stage 2: Wrap the built CyberChef HTML in Electron and package it
   # for each target OS using electron-builder.
   # ---------------------------------------------------------------------
-  # package-electron:
-  #   needs: build-cyberchef
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         - os: ubuntu-latest
-  #           build-cmd: npx electron-builder --linux deb tar.xz AppImage
-  #         - os: macos-latest
-  #           build-cmd: npx electron-builder -m
-  #         - os: windows-latest
-  #           build-cmd: npx electron-builder --win nsis
+  package-electron:
+    needs: build-cyberchef
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            build-cmd: npx electron-builder --linux deb tar.xz AppImage
+          - os: macos-latest
+            build-cmd: npx electron-builder -m
+          - os: windows-latest
+            build-cmd: npx electron-builder --win nsis
 
-  #   runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
+    steps:
+
+      - name: Debug
+        working-directory: electron
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents:"
+          ls -la 
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.19.0'
+          cache: 'npm'
+
+      - name: Install wrapper dependencies
+        run: npm ci
+
+      - name: Package with electron-builder
+        run: ${{ matrix.build-cmd }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+
 
   #     - name: Checkout electron/minimal-repro
   #       uses: actions/checkout@v4
@@ -174,8 +198,6 @@ jobs:
   #         repository: electron/minimal-repro
   #         ref: ${{ github.event.inputs.cyberchef-ref || 'master' }}
   #         # path: /
-
-
 
   #     - name: Restore ZIP
   #       uses: actions/cache@v6
@@ -204,13 +226,7 @@ jobs:
   #     - name: Install wrapper dependencies
   #       run: npm ci
 
-
-
-
-
-
-
-
+  
       # - name: Check ZIP
       #   run: |
       #     ls -lh cyberchef.zip
