@@ -165,11 +165,20 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            build-cmd: npm run dist # npx electron-builder --linux deb tar.xz AppImage
+            build-cmd: |
+              npm install electron-builder --save-dev
+              npm run dist 
+              # npx electron-builder --linux deb tar.xz AppImage
           - os: macos-latest
-            build-cmd: npm run dist # npx electron-builder -m
+            build-cmd: |
+              npm install electron-builder --save-dev
+              npm run dist 
+              # npx electron-builder -m
           - os: windows-latest
-            build-cmd: npm run dist # npx electron-builder --win nsis
+            build-cmd: |
+              npm install electron-builder --save-dev
+              npm run dist 
+              # npx electron-builder --win nsis
 
     runs-on: ${{ matrix.os }}
 
@@ -196,10 +205,10 @@ jobs:
           node-version: '24.19.0'
           cache: 'npm'
 
-      - name: Install "npm install electron-builder --save-dev"
-        working-directory: electron
-        run: |
-          npm install electron-builder --save-dev
+      # - name: Install "npm install electron-builder --save-dev"
+      #   working-directory: electron
+      #   run: |
+      #     npm install electron-builder --save-dev
 
       # - name: Install wrapper dependencies
       #   run: npm ci
