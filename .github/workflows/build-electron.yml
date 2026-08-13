@@ -139,7 +139,7 @@ jobs:
       - name: Install "npm install electron-builder --save-dev"
         working-directory: electron
         run: |
-          npm install electron-builder --save-dev
+          npm install electron-builder --save-dev --publish never
 
       - name: Install "npm run dist"
         working-directory: electron
@@ -166,17 +166,17 @@ jobs:
         include:
           - os: ubuntu-latest
             build-cmd: |
-              npm install electron-builder --save-dev
+              npm install electron-builder --save-dev --publish never
               npm run dist 
               # npx electron-builder --linux deb tar.xz AppImage
           - os: macos-latest
             build-cmd: |
-              npm install electron-builder --save-dev
+              npm install electron-builder --save-dev --publish never
               npm run dist 
               # npx electron-builder -m
           - os: windows-latest
             build-cmd: |
-              npm install electron-builder --save-dev
+              npm install electron-builder --save-dev --publish never
               npm run dist 
               # npx electron-builder --win nsis
 
@@ -192,12 +192,12 @@ jobs:
           name: workspace-artifact
           path: electron/           # Directory to unpack into
 
-      - name: Debug
-        working-directory: electron
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Contents:"
-          ls -la 
+      # - name: Debug
+      #   working-directory: electron
+      #   run: |
+      #     echo "Current directory: $(pwd)"
+      #     echo "Contents:"
+      #     ls -la 
 
       - name: Set up Node.js
         uses: actions/setup-node@v7

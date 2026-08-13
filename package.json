@@ -34,7 +34,7 @@
       "target": "dmg"
     },
     "win": {
-      "icon": "build/icon.png",
+      "icon": "build/icons/icon.png",
       "target": [
         {
           "target": "nsis",
@@ -43,7 +43,7 @@
       ]
     },
     "linux": {
-      "icon": "build/icon.png",
+      "icon": "build/icons/icon.png",
       "target": [
         {
           "target": ["AppImage", "deb", "tar.xz"],
